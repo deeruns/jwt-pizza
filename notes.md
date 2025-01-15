@@ -6,10 +6,11 @@ As part of `Deliverable ⓵ Development deployment: JWT Pizza`, start up the app
 
 | User activity                                       | Frontend component | Backend endpoints | Database SQL |
 | --------------------------------------------------- | ------------------ | ----------------- | ------------ |
-| View home page                                      |                    |                   |              |
-| Register new user<br/>(t@jwt.com, pw: test)         |                    |                   |              |
-| Login new user<br/>(t@jwt.com, pw: test)            |                    |                   |              |
-| Order pizza                                         |                    |                   |              |
+| View home page                                      |     home.jsx       |     none          |     none     |
+| Register new user<br/>(t@jwt.com, pw: test)         |      login.jsx     |     [PUT]/api/auth|INSERT INTO user (name, email, password) VALUES (?, ?, ?) INSERT INTO userRole (userId, role, objectId) VALUES (?, ?, ?)|
+| Login new user<br/>(t@jwt.com, pw: test)            |        login.jsx   | [PUT]/api/auth    |              |
+                                                                            [GET]/api/franchise
+| Order pizza                                         |                    |[GET]/api/order/menu|`SELECT * FROM menu`|
 | Verify pizza                                        |                    |                   |              |
 | View profile page                                   |                    |                   |              |
 | View franchise<br/>(as diner)                       |                    |                   |              |
@@ -24,3 +25,4 @@ As part of `Deliverable ⓵ Development deployment: JWT Pizza`, start up the app
 | View Admin page                                     |                    |                   |              |
 | Create a franchise for t@jwt.com                    |                    |                   |              |
 | Close the franchise for t@jwt.com                   |                    |                   |              |
+ 

@@ -12,8 +12,7 @@ jobs:
     steps:
       - name: create static deployment file
         run: |
-          mkdir dist
-          echo "<h1>Hello GitHub Pages</h1>" >> dist/index.html
+          echo "pizza.deeruns.click" > build/CNAME
 
       - name: Update pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -26,6 +25,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
+      #url: ${{ deeruns.click }}
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:

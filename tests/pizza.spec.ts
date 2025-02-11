@@ -167,6 +167,7 @@ test('navigate to admin profile', async ({ page }) => {
 
     test('about page', async ({ page }) => { 
       // go to the about page and look at it
+      //check
       await page.goto('/');
       await page.getByRole('link', { name: 'About' }).click();
       await expect(page.getByRole('main')).toContainText('The secret sauce');
@@ -177,13 +178,94 @@ test('navigate to admin profile', async ({ page }) => {
 
     test('franchise dashboard, create and close a store', async ({ page }) => { 
 
-      await page.goto('http://localhost:5173/');
-    
-      await page.getByRole('link', { name: 'Login' }).click();
-      await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
-      await page.getByRole('textbox', { name: 'Password' }).click();
-      await page.getByRole('textbox', { name: 'Password' }).fill('franchisee');
-      await page.getByRole('button', { name: 'Login' }).click();
+      //login
+      await page.route('*/**/api/auth', async (route) =>{
+        const loginReq = {
+          "email": "f@jwt.com",
+          "password": "franchisee"
+        }
+        const loginRes = {
+          "user": {
+            "id": 4,
+            "name": "pizza franchisee",
+            "email": "f@jwt.com",
+            "roles": [
+              {
+                "objectId": 1,
+                "role": "franchisee"
+              },
+              {
+                "objectId": 3,
+                "role": "franchisee"
+              },
+              {
+                "objectId": 5,
+                "role": "franchisee"
+              }
+            ]
+          },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwibmFtZSI6InBpenphIGZyYW5jaGlzZWUiLCJlbWFpbCI6ImZAand0LmNvbSIsInJvbGVzIjpbeyJvYmplY3RJZCI6MSwicm9sZSI6ImZyYW5jaGlzZWUifSx7Im9iamVjdElkIjozLCJyb2xlIjoiZnJhbmNoaXNlZSJ9LHsib2JqZWN0SWQiOjUsInJvbGUiOiJmcmFuY2hpc2VlIn1dLCJpYXQiOjE3MzkzMDE4NzV9.aB7c5PHI1cL4WxKzJNhzd4PBwjUnM6u53UKIoeGJz2U"
+        }
+        expect(route.request().method()).toBe('PUT');
+        expect(route.request().postDataJSON()).toMatchObject(loginReq);
+        await route.fulfill({ json: loginRes });
+      })
+      
+      //franchise tab?
+      await page.route('*/**/api/franchise/4', async (route) => {
+        const franchiseRes = [
+          {
+            "id": 1,
+            "name": "pizzaPocket",
+            "admins": [
+              {
+                "id": 4,
+                "name": "pizza franchisee",
+                "email": "f@jwt.com"
+              }
+            ],
+            "stores": [
+              {
+                "id": 1,
+                "name": "SLC",
+                "totalRevenue": 1.848
+              },
+              {
+                "id": 2,
+                "name": "SLC",
+                "totalRevenue": 0
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "name": "testPizzaPocket",
+            "admins": [
+              {
+                "id": 4,
+                "name": "pizza franchisee",
+                "email": "f@jwt.com"
+              }
+            ],
+            "stores": []
+          },
+          {
+            "id": 5,
+            "name": "testPizzaFranchise",
+            "admins": [
+              {
+                "id": 4,
+                "name": "pizza franchisee",
+                "email": "f@jwt.com"
+              }
+            ],
+            "stores": []
+          }
+        ]
+        expect(route.request().method()).toBe('GET');
+        await route.fulfill({ json: franchiseRes });
+      });
+      
       await expect(page.getByRole('heading')).toContainText('The web\'s best pizza');
       await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
       await expect(page.getByRole('main')).toContainText('Everything you need to run an JWT Pizza franchise. Your gateway to success.');
@@ -201,6 +283,7 @@ test('navigate to admin profile', async ({ page }) => {
 
     test('register and logout', async ({ page }) => { 
       //check
+      //register new user
       await page.route('*/**/api/auth', async (route) =>{
         const registerReq = {
           "name": "dee",
@@ -223,12 +306,16 @@ test('navigate to admin profile', async ({ page }) => {
         expect(route.request().method()).toBe('POST');
         expect(route.request().postDataJSON()).toMatchObject(registerReq);
         await route.fulfill({ json: registerRes });
-      })
+      });
+      
+      //logout user
       await page.route('*/**/api/auth', async (route) =>{
         const logoutRes = {"message": "logout successful"}
         expect(route.request().method()).toBe('DELETE');
         await route.fulfill({ json: logoutRes });
-      })
+      });
+      //do i need to delete the user?
       //await page.goto('/');
       //await page.getByRole('link', { name: 'Logout' }).click();
     });
+    

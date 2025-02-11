@@ -164,3 +164,13 @@ test('navigate to admin profile', async ({ page }) => {
     await expect(page.getByRole('main')).toContainText('Are you sure you want to close the deliverable4franchise franchise? This will close all associated stores and cannot be restored. All outstanding revenue with not be refunded.');
     await page.getByRole('button', { name: 'Close' }).click();
     });
+
+    test('about page', async ({ page }) => { 
+      // go to the about page and look at it
+      await page.goto('/');
+      await page.getByRole('link', { name: 'About' }).click();
+      await expect(page.getByRole('main')).toContainText('The secret sauce');
+      await expect(page.getByRole('main')).toContainText('At JWT Pizza, our amazing employees are the secret behind our delicious pizzas. They are passionate about their craft and spend every waking moment dreaming about how to make our pizzas even better. From selecting the finest ingredients to perfecting the dough and sauce recipes, our employees go above and beyond to ensure the highest quality and taste in every bite. Their dedication and attention to detail make all the difference in creating a truly exceptional pizza experience for our customers. We take pride in our team and their commitment to delivering the best pizza in town.');
+      await page.getByRole('link', { name: 'History' }).click();
+      await expect(page.getByRole('heading')).toContainText('Mama Rucci, my my');
+    });

@@ -265,8 +265,98 @@ test('navigate to admin profile', async ({ page }) => {
         expect(route.request().method()).toBe('GET');
         await route.fulfill({ json: franchiseRes });
       });
+
+      await page.route('*/**/api/franchise/1/store', async (route) => {
+        const createStoreReq = {
+          "id": "",
+          "name": "teststore"
+        }
+        const createStoreRes = {
+          "id": 121,
+          "franchiseId": 1,
+          "name": "teststore"
+        }
+        expect(route.request().method()).toBe('POST');
+        await route.fulfill({ json: createStoreRes });
+      });
+
+      //franchise after store creation
+      await page.route('*/**/api/franchise/4', async (route) => {
+        const franchiseResp = [
+          {
+            "id": 1,
+            "name": "pizzaPocket",
+            "admins": [
+              {
+                "id": 4,
+                "name": "pizza franchisee",
+                "email": "f@jwt.com"
+              }
+            ],
+            "stores": [
+              {
+                "id": 1,
+                "name": "SLC",
+                "totalRevenue": 1.848
+              },
+              {
+                "id": 2,
+                "name": "SLC",
+                "totalRevenue": 0
+              },
+              {
+                "id": 121,
+                "name": "teststore",
+                "totalRevenue": 0
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "name": "testPizzaPocket",
+            "admins": [
+              {
+                "id": 4,
+                "name": "pizza franchisee",
+                "email": "f@jwt.com"
+              }
+            ],
+            "stores": []
+          },
+          {
+            "id": 5,
+            "name": "testPizzaFranchise",
+            "admins": [
+              {
+                "id": 4,
+                "name": "pizza franchisee",
+                "email": "f@jwt.com"
+              }
+            ],
+            "stores": []
+          }
+        ]
+        expect(route.request().method()).toBe('GET');
+        await route.fulfill({ json: franchiseResp });
+      });
       
-      await expect(page.getByRole('heading')).toContainText('The web\'s best pizza');
+      //delete the store
+      await page.route('*/**/api/franchise/1/store/121', async (route) => {
+        expect(route.request().method()).toBe('DELETE');
+        //await route.fulfill({ json: createStoreRes });
+        await route.fulfill({
+          status: 204,  // No Content response
+        });
+      });
+
+      await page.goto('/');
+
+      await page.getByRole('link', { name: 'Login' }).click();
+      await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
+      await page.getByRole('textbox', { name: 'Password' }).click();
+      await page.getByRole('textbox', { name: 'Password' }).fill('franchisee');
+      await page.getByRole('button', { name: 'Login' }).click();
+
       await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
       await expect(page.getByRole('main')).toContainText('Everything you need to run an JWT Pizza franchise. Your gateway to success.');
     

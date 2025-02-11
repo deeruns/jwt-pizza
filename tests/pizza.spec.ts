@@ -198,3 +198,37 @@ test('navigate to admin profile', async ({ page }) => {
       await expect(page.getByRole('heading')).toContainText('Sorry to see you go');
       await page.getByRole('button', { name: 'Close' }).click();
     });
+
+    test('register and logout', async ({ page }) => { 
+      //check
+      await page.route('*/**/api/auth', async (route) =>{
+        const registerReq = {
+          "name": "dee",
+          "email": "dee@jwt.com",
+          "password": "dee"
+        }
+        const registerRes = {
+          "user": {
+            "name": "dee",
+            "email": "dee@jwt.com",
+            "roles": [
+              {
+                "role": "diner"
+              }
+            ],
+            "id": 1065
+          },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiZGVlIiwiZW1haWwiOiJkZWVAand0LmNvbSIsInJvbGVzIjpbeyJyb2xlIjoiZGluZXIifV0sImlkIjoxMDY1LCJpYXQiOjE3MzkzMDA0MDF9.6DMmChliJErzcVu_I7diF8ReuxJ-YGt1HvrCcy4XKE4"
+        }
+        expect(route.request().method()).toBe('POST');
+        expect(route.request().postDataJSON()).toMatchObject(registerReq);
+        await route.fulfill({ json: registerRes });
+      })
+      await page.route('*/**/api/auth', async (route) =>{
+        const logoutRes = {"message": "logout successful"}
+        expect(route.request().method()).toBe('DELETE');
+        await route.fulfill({ json: logoutRes });
+      })
+      //await page.goto('/');
+      //await page.getByRole('link', { name: 'Logout' }).click();
+    });

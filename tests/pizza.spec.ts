@@ -106,46 +106,55 @@ test('buy pizza with login', async ({ page }) => {
 test('navigate to admin profile', async ({ page }) => { 
   
   await page.route('*/**/api/auth', async (route) => {
-    const loginReq = { email: 'a@jwt.com', password: 'admin' };
-    const loginRes = {
-      "user": {
-        "id": 1,
-        "name": "常用名字",
-        "email": "a@jwt.com",
-        "roles": [
-          {
-            "role": "admin"
-          }
-        ]
-      },
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6IuW4uOeUqOWQjeWtlyIsImVtYWlsIjoiYUBqd3QuY29tIiwicm9sZXMiOlt7InJvbGUiOiJhZG1pbiJ9XSwiaWF0IjoxNzM5MzA0MDEwfQ.mqGai4yWz0VexlAQLsxeWBPCOk4wfxv-YdZESImxFiY"
-    };
-    expect(route.request().method()).toBe('PUT');
-    expect(route.request().postDataJSON()).toMatchObject(loginReq);
-    await route.fulfill({ json: loginRes });
-  });
+    const method = route.request().method();
 
-  // await page.route('*/**/api/auth', async (route) =>{
-  //   const logoutRes = {"message": "logout successful"}
-  //   expect(route.request().method()).toBe('DELETE');
-  //   await route.fulfill({ json: logoutRes });
-  // });
+    switch (method) {
+      case 'PUT': { // Login request
+        const loginReq = { email: 'a@jwt.com', password: 'admin' };
+        const loginRes = {
+          "user": {
+            "id": 1,
+            "name": "常用名字",
+            "email": "a@jwt.com",
+            "roles": [{ "role": "admin" }]
+          },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        };
+        expect(route.request().postDataJSON()).toMatchObject(loginReq);
+        await route.fulfill({ json: loginRes });
+        break;
+      }
+
+      case 'DELETE': { // Logout request
+        const logoutRes = { "message": "logout successful" };
+        await route.fulfill({ json: logoutRes });
+        break;
+      }
+
+      default: {
+        await route.continue();
+        break;
+      }
+    }
+  });
 
   await page.goto('/');
   
   await page.getByRole('link', { name: 'Login' }).click();
   await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
-  await page.getByRole('textbox', { name: 'Password' }).click();
   await page.getByRole('textbox', { name: 'Password' }).fill('admin');
   await page.getByRole('button', { name: 'Login' }).click();
 
-  // go to admin profile
+  // Navigate to admin profile
   await page.getByRole('link', { name: '常' }).click();
   await expect(page.getByRole('main')).toContainText('常用名字');
   await expect(page.getByRole('main')).toContainText('a@jwt.com');
   await expect(page.getByRole('main')).toContainText('admin');
-  //await page.getByRole('link', { name: 'Logout' }).click();
-  });
+
+  // Logout
+  await page.getByRole('link', { name: 'Logout' }).click();
+});
+
 
   test('create and close franchise', async ({ page }) => { 
     //login
@@ -169,179 +178,6 @@ test('navigate to admin profile', async ({ page }) => {
       await route.fulfill({ json: loginRes });
     });
 
-    //franchise page
-    // await page.route('*/**/api/franchise', async (route) => {
-    //   const franchiseRes = [
-    //     {
-    //       "id": 12,
-    //       "name": "Davins Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 511,
-    //           "name": "2mg2o6jb4s",
-    //           "email": "2mg2o6jb4s@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 48,
-    //       "name": "Dee Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 591,
-    //           "name": "uu70j49wxb",
-    //           "email": "uu70j49wxb@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 42,
-    //       "name": "Dees Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 586,
-    //           "name": "3t7eyi2ih9",
-    //           "email": "3t7eyi2ih9@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 52,
-    //       "name": "Deez Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 599,
-    //           "name": "7dpns3nbrn",
-    //           "email": "7dpns3nbrn@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 25,
-    //       "name": "Franchise for Store",
-    //       "admins": [
-    //         {
-    //           "id": 545,
-    //           "name": "p5kl9lc3lq",
-    //           "email": "p5kl9lc3lq@admin.com"
-    //         }
-    //       ],
-    //       "stores": [
-    //         {
-    //           "id": 39,
-    //           "name": "New Pizza Store",
-    //           "totalRevenue": 0
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       "id": 8,
-    //       "name": "New Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 499,
-    //           "name": "tabeeyv2u6",
-    //           "email": "tabeeyv2u6@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 39,
-    //       "name": "new Franchise for new store",
-    //       "admins": [
-    //         {
-    //           "id": 578,
-    //           "name": "tcbenmsiyz",
-    //           "email": "tcbenmsiyz@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 1,
-    //       "name": "pizzaPocket",
-    //       "admins": [
-    //         {
-    //           "id": 4,
-    //           "name": "pizza franchisee",
-    //           "email": "f@jwt.com"
-    //         }
-    //       ],
-    //       "stores": [
-    //         {
-    //           "id": 1,
-    //           "name": "SLC",
-    //           "totalRevenue": 1.848
-    //         },
-    //         {
-    //           "id": 2,
-    //           "name": "SLC",
-    //           "totalRevenue": 0
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       "id": 5,
-    //       "name": "testPizzaFranchise",
-    //       "admins": [
-    //         {
-    //           "id": 4,
-    //           "name": "pizza franchisee",
-    //           "email": "f@jwt.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 3,
-    //       "name": "testPizzaPocket",
-    //       "admins": [
-    //         {
-    //           "id": 4,
-    //           "name": "pizza franchisee",
-    //           "email": "f@jwt.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     }
-    //   ];
-    //   expect(route.request().method()).toBe('GET');
-    //   await route.fulfill({ json: franchiseRes });
-    // });
-
-    //create franchise
-    // await page.route('*/**/api/franchise', async (route) => {
-    //   const franchiseCreateReq = {
-    //     "stores": [],
-    //     "id": "",
-    //     "name": "rand",
-    //     "admins": [
-    //       {
-    //         "email": "a@jwt.com"
-    //       }
-    //     ]
-    //   };
-    //   const franchiseCreateRes = {
-    //     "stores": [],
-    //     "id": 239,
-    //     "name": "rand",
-    //     "admins": [
-    //       {
-    //         "email": "a@jwt.com",
-    //         "id": 1,
-    //         "name": "常用名字"
-    //       }
-    //     ]
-    //   };
-    //   expect(route.request().method()).toBe('POST');
-    //   expect(route.request().postDataJSON()).toMatchObject(franchiseCreateReq);
-    //   await route.fulfill({ json: franchiseCreateRes });
-    // });
     let createdFranchiseId: number; // Variable to store the new franchise ID
 
     await page.route('*/**/api/franchise', async (route) => {
@@ -372,172 +208,6 @@ test('navigate to admin profile', async ({ page }) => {
         await route.fulfill({ json: franchiseRes });
       }
     });
-
-
-    //look at franchises again
-    // await page.route('*/**/api/franchise', async (route) => {
-    //   const franchiseRes = [
-    //     {
-    //       "id": 12,
-    //       "name": "Davins Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 511,
-    //           "name": "2mg2o6jb4s",
-    //           "email": "2mg2o6jb4s@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 48,
-    //       "name": "Dee Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 591,
-    //           "name": "uu70j49wxb",
-    //           "email": "uu70j49wxb@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 42,
-    //       "name": "Dees Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 586,
-    //           "name": "3t7eyi2ih9",
-    //           "email": "3t7eyi2ih9@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 52,
-    //       "name": "Deez Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 599,
-    //           "name": "7dpns3nbrn",
-    //           "email": "7dpns3nbrn@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 239,
-    //       "name": "rand",
-    //       "admins": [
-    //         {
-    //           "id": 1,
-    //           "name": "常用名字",
-    //           "email": "a@jwt.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 25,
-    //       "name": "Franchise for Store",
-    //       "admins": [
-    //         {
-    //           "id": 545,
-    //           "name": "p5kl9lc3lq",
-    //           "email": "p5kl9lc3lq@admin.com"
-    //         }
-    //       ],
-    //       "stores": [
-    //         {
-    //           "id": 39,
-    //           "name": "New Pizza Store",
-    //           "totalRevenue": 0
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       "id": 8,
-    //       "name": "New Franchise",
-    //       "admins": [
-    //         {
-    //           "id": 499,
-    //           "name": "tabeeyv2u6",
-    //           "email": "tabeeyv2u6@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 39,
-    //       "name": "new Franchise for new store",
-    //       "admins": [
-    //         {
-    //           "id": 578,
-    //           "name": "tcbenmsiyz",
-    //           "email": "tcbenmsiyz@admin.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 1,
-    //       "name": "pizzaPocket",
-    //       "admins": [
-    //         {
-    //           "id": 4,
-    //           "name": "pizza franchisee",
-    //           "email": "f@jwt.com"
-    //         }
-    //       ],
-    //       "stores": [
-    //         {
-    //           "id": 1,
-    //           "name": "SLC",
-    //           "totalRevenue": 1.848
-    //         },
-    //         {
-    //           "id": 2,
-    //           "name": "SLC",
-    //           "totalRevenue": 0
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       "id": 5,
-    //       "name": "testPizzaFranchise",
-    //       "admins": [
-    //         {
-    //           "id": 4,
-    //           "name": "pizza franchisee",
-    //           "email": "f@jwt.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     },
-    //     {
-    //       "id": 3,
-    //       "name": "testPizzaPocket",
-    //       "admins": [
-    //         {
-    //           "id": 4,
-    //           "name": "pizza franchisee",
-    //           "email": "f@jwt.com"
-    //         }
-    //       ],
-    //       "stores": []
-    //     }
-    //   ]
-    //   expect(route.request().method()).toBe('GET');
-    //   await route.fulfill({ json: franchiseRes });
-    // });
-
-    // await page.route('*/**/api/franchise/234', async (route) => {
-    //   const deleteRes = {
-    //     "message": "franchise deleted"
-    //   };
-    //   expect(route.request().method()).toBe('DELETE');
-    //   await route.fulfill({ json: deleteRes });
-    // });
 
     await page.route(new RegExp(`.*/api/franchise/\\d+$`), async (route) => {
       const requestedUrl = route.request().url();
@@ -810,13 +480,16 @@ test('navigate to admin profile', async ({ page }) => {
         await route.fulfill({ json: registerRes });
       });
       
-      //logout user
-      await page.route('*/**/api/auth', async (route) =>{
-        const logoutRes = {"message": "logout successful"}
-        expect(route.request().method()).toBe('DELETE');
-        await route.fulfill({ json: logoutRes });
-      });
-      //do i need to delete the user?
-      //await page.goto('/');
-      //await page.getByRole('link', { name: 'Logout' }).click();
+      await page.goto('http://localhost:5173/');
+      await page.getByRole('link', { name: 'Register' }).click();
+      await page.getByRole('textbox', { name: 'Full name' }).fill('dee');
+      await page.getByRole('textbox', { name: 'Email address' }).click();
+      await page.getByRole('textbox', { name: 'Email address' }).fill('dee@jwt.com');
+      await page.getByRole('textbox', { name: 'Password' }).click();
+      await page.getByRole('textbox', { name: 'Password' }).fill('dee');
+      await page.getByRole('button', { name: 'Register' }).click();
+
     });
+
+
+    //await page.goto('chrome-error://chromewebdata/');

@@ -174,3 +174,27 @@ test('navigate to admin profile', async ({ page }) => {
       await page.getByRole('link', { name: 'History' }).click();
       await expect(page.getByRole('heading')).toContainText('Mama Rucci, my my');
     });
+
+    test('franchise dashboard, create and close a store', async ({ page }) => { 
+
+      await page.goto('http://localhost:5173/');
+    
+      await page.getByRole('link', { name: 'Login' }).click();
+      await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
+      await page.getByRole('textbox', { name: 'Password' }).click();
+      await page.getByRole('textbox', { name: 'Password' }).fill('franchisee');
+      await page.getByRole('button', { name: 'Login' }).click();
+      await expect(page.getByRole('heading')).toContainText('The web\'s best pizza');
+      await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
+      await expect(page.getByRole('main')).toContainText('Everything you need to run an JWT Pizza franchise. Your gateway to success.');
+    
+      //create store
+      await page.getByRole('button', { name: 'Create store' }).click();
+      await page.getByRole('textbox', { name: 'store name' }).click();
+      await page.getByRole('textbox', { name: 'store name' }).fill('teststore');
+      await page.getByRole('button', { name: 'Create' }).click();
+      //close store
+      await page.getByRole('row', { name: 'teststore 0 ₿ Close' }).getByRole('button').click();
+      await expect(page.getByRole('heading')).toContainText('Sorry to see you go');
+      await page.getByRole('button', { name: 'Close' }).click();
+    });

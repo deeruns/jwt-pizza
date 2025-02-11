@@ -137,3 +137,30 @@ test('navigate to admin profile', async ({ page }) => {
   await page.getByRole('link', { name: 'Logout' }).click();
   });
 
+  test('create and close franchise', async ({ page }) => { 
+    await page.goto('http://localhost:5173/');
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).click();
+    await page.getByRole('textbox', { name: 'Password' }).fill('admin');
+    await page.getByRole('button', { name: 'Login' }).click();
+    
+    await page.getByRole('link', { name: 'Admin' }).click();
+    await expect(page.getByRole('main')).toContainText('Keep the dough rolling and the franchises signing up.');
+    await expect(page.getByRole('table')).toContainText('pizzaPocket');
+    await expect(page.getByRole('table')).toContainText('testPizzaFranchise');
+    
+    await page.getByRole('button', { name: 'Add Franchise' }).click();
+    await expect(page.locator('form')).toContainText('Want to create franchise?');
+    await page.getByRole('textbox', { name: 'franchise name' }).click();
+    await page.getByRole('textbox', { name: 'franchise name' }).fill('deliverable4franchise');
+    await page.getByRole('textbox', { name: 'franchisee admin email' }).click();
+    await page.getByRole('textbox', { name: 'franchisee admin email' }).fill('a@jwt.com');
+    
+    await page.getByRole('button', { name: 'Create' }).click();
+    await expect(page.getByRole('table')).toContainText('deliverable4franchise');
+    await expect(page.getByRole('table')).toContainText('常用名字');
+    await page.getByRole('row', { name: 'deliverable4franchise 常用名字' }).getByRole('button').click();
+    await expect(page.getByRole('main')).toContainText('Are you sure you want to close the deliverable4franchise franchise? This will close all associated stores and cannot be restored. All outstanding revenue with not be refunded.');
+    await page.getByRole('button', { name: 'Close' }).click();
+    });
